@@ -21,7 +21,7 @@ func getChar(grayScale int) string {
 }
 
 func main() {
-	imgfile, err := os.Open("./lion.jpg")
+	imgfile, err := os.Open("./eye.jpg")
 
 	if err != nil {
 		fmt.Println("img.jpg file not found!")
@@ -59,28 +59,19 @@ func main() {
 
 	defer imgfile2.Close()
 
-	imgCfg, _, err := image.DecodeConfig(imgfile2)
-
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	imgfile2.Seek(0, 0)
 
-	width := imgCfg.Width
-	height := imgCfg.Height
-
-	fmt.Println("Width : ", width)
-	fmt.Println("Height : ", height)
-
 	img2, _, _ := image.Decode(imgfile2)
-
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
-			r, g, b, _ := img2.At(x, y).RGBA()
-			fmt.Println(r, g, b)
+	grayImg := image.NewGray(img2.Bounds())
+	for y := img2.Bounds().Min.Y; y < img2.Bounds().Max.Y; y++ {
+		for x := img2.Bounds().Min.X; x < img2.Bounds().Max.X; x++ {
+			grayImg.Set(x, y, img2.At(x, y))
+			r, g, b, _ := grayImg.At(x, y).RGBA()
 			avg := uint8((r + g + b) / 3)
-			fmt.Println(avg)
 			_, err2 := f.WriteString(getChar(int(avg)))
 			if err2 != nil {
 				log.Fatal(err2)
