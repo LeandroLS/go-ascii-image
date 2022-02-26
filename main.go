@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"image/jpeg"
 	_ "image/jpeg"
@@ -16,34 +15,50 @@ import (
 func getChar(grayScale int) string {
 	// densityCharsArr := []string{"  ", "--", "oo", "WW", "##"}
 	// densityCharsArr := []string{"==","==","==","==","==","==","==","--","--","--","--","--","--","--","--","::","::","::","::","::","::","::","::","::","..","..","..","..","..","..","..",".."}
-	densityCharsArr := []string{"@@","@@","@@","@@","@@","@@","@@","@@","%%","%%","%%","%%","%%","%%","%%","%%","##","##","##","##","##","##","##","##","##","**","**","**","**","**","**","**","**","++","++","++","++","++","++","++","++","++","==","==","==","==","==","==","==","=="}
+	densityCharsArr := []string{"@@", "@@", "@@", "@@", "@@", "@@", "@@", "@@", "%%", "%%", "%%", "%%", "%%", "%%", "%%", "%%", "##", "##", "##", "##", "##", "##", "##", "##", "##", "**", "**", "**", "**", "**", "**", "**", "**", "++", "++", "++", "++", "++", "++", "++", "++", "++", "==", "==", "==", "==", "==", "==", "==", "=="}
 	interval := float64(len(densityCharsArr)) / float64(256)
 	return densityCharsArr[int(math.Floor(float64(grayScale)*interval))]
 }
 
-func main() {
-	imgfile, err := os.Open("./woman3.jpg")
-
-	if err != nil {
-		fmt.Println("img.jpg file not found!")
-		os.Exit(1)
-	}
-
-	defer imgfile.Close()
-	imgfile.Seek(0, 0)
-
-	img, _, _ := image.Decode(imgfile)
-	imgResized := resize.Resize(100, 0, img, resize.Lanczos3)
-
-	out, err := os.Create("test_resized.jpg")
+func openImgFile(imgFileName string) image.Image {
+	imgOpened, err := os.Open(imgFileName)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer out.Close()
-	out.Seek(0, 0)
+	defer imgOpened.Close()
+	imgOpened.Seek(0, 0)
+	img, _, err := image.Decode(imgOpened)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return img
+}
 
-	jpeg.Encode(out, imgResized, nil)
-	f, _ := os.Create("data.txt")
+func resizeImg(image image.Image) {
+	userImgResized := resize.Resize(100, 0, image, resize.Lanczos3)
+	newUserImgResized, err := os.Create("resized-img.jpg")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer newUserImgResized.Close()
+	newUserImgResized.Seek(0, 0)
+
+	jpeg.Encode(newUserImgResized, userImgResized, nil)
+	// return newUserImgResized
+
+}
+
+func main() {
+	img := openImgFile("./cat.jpg")
+	resizeImg(img)
+	imgToGrayAscii, err := os.Open("resized-img.jpg")
+	imgToGrayAscii.Seek(0, 0)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	f, err := os.Create("ascii.txt")
 
 	if err != nil {
 		log.Fatal(err)
@@ -51,22 +66,7 @@ func main() {
 
 	defer f.Close()
 
-	imgfile2, err := os.Open("./test_resized.jpg")
-
-	if err != nil {
-		fmt.Println("img.jpg file not found!")
-		os.Exit(1)
-	}
-
-	defer imgfile2.Close()
-
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	imgfile2.Seek(0, 0)
-
-	img2, _, _ := image.Decode(imgfile2)
+	img2, _, _ := image.Decode(imgToGrayAscii)
 	grayImg := image.NewGray(img2.Bounds())
 	for y := img2.Bounds().Min.Y; y < img2.Bounds().Max.Y; y++ {
 		for x := img2.Bounds().Min.X; x < img2.Bounds().Max.X; x++ {
