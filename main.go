@@ -14,14 +14,15 @@ import (
 )
 
 func getChar(grayScale int) string {
-	densityCharsArr := []string{"  ", "--", "oo", "WW", "##"}
-
+	// densityCharsArr := []string{"  ", "--", "oo", "WW", "##"}
+	// densityCharsArr := []string{"==","==","==","==","==","==","==","--","--","--","--","--","--","--","--","::","::","::","::","::","::","::","::","::","..","..","..","..","..","..","..",".."}
+	densityCharsArr := []string{"@@","@@","@@","@@","@@","@@","@@","@@","%%","%%","%%","%%","%%","%%","%%","%%","##","##","##","##","##","##","##","##","##","**","**","**","**","**","**","**","**","++","++","++","++","++","++","++","++","++","==","==","==","==","==","==","==","=="}
 	interval := float64(len(densityCharsArr)) / float64(256)
 	return densityCharsArr[int(math.Floor(float64(grayScale)*interval))]
 }
 
 func main() {
-	imgfile, err := os.Open("./eye.jpg")
+	imgfile, err := os.Open("./woman3.jpg")
 
 	if err != nil {
 		fmt.Println("img.jpg file not found!")
@@ -32,7 +33,7 @@ func main() {
 	imgfile.Seek(0, 0)
 
 	img, _, _ := image.Decode(imgfile)
-	imgResized := resize.Resize(50, 0, img, resize.Lanczos3)
+	imgResized := resize.Resize(100, 0, img, resize.Lanczos3)
 
 	out, err := os.Create("test_resized.jpg")
 	if err != nil {
@@ -40,7 +41,7 @@ func main() {
 	}
 	defer out.Close()
 	out.Seek(0, 0)
-	// write new image to file
+
 	jpeg.Encode(out, imgResized, nil)
 	f, _ := os.Create("data.txt")
 
