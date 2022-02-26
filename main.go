@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
@@ -11,30 +12,35 @@ import (
 	"github.com/nfnt/resize"
 )
 
+func Init() (image.Image, int) {
+	width := flag.Int("w", 80, "Use -w <width>")
+	fpath := flag.String("p", "test.jpg", "Use -p <filesource>")
+	flag.Parse()
+
+	f, err := os.Open(*fpath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	img, _, err := image.Decode(f)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	f.Close()
+	return img, *width
+}
+
 func getChar(grayScale int) string {
 	densityCharsArr := []string{"@@", "@@", "@@", "@@", "@@", "@@", "@@", "@@", "%%", "%%", "%%", "%%", "%%", "%%", "%%", "%%", "##", "##", "##", "##", "##", "##", "##", "##", "##", "**", "**", "**", "**", "**", "**", "**", "**", "++", "++", "++", "++", "++", "++", "++", "++", "++", "==", "==", "==", "==", "==", "==", "==", "=="}
 	interval := float64(len(densityCharsArr)) / float64(256)
 	return densityCharsArr[int(math.Floor(float64(grayScale)*interval))]
 }
 
-func openImgFile(imgFileName string) image.Image {
-	imgOpened, err := os.Open(imgFileName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer imgOpened.Close()
-
-	img, _, err := image.Decode(imgOpened)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return img
-}
-
 func main() {
-	userImg := openImgFile("./cat.jpg")
+	userImg, width := Init()
 
-	userImgResized := resize.Resize(100, 0, userImg, resize.Lanczos3)
+	userImgResized := resize.Resize(uint(width), 0, userImg, resize.Lanczos3)
 
 	f, err := os.Create("ascii.txt")
 
