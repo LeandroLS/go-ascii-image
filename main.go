@@ -34,7 +34,7 @@ func openImgFile(imgFileName string) image.Image {
 	return img
 }
 
-func resizeImg(image image.Image) {
+func resizeImg(image image.Image) *os.File {
 	userImgResized := resize.Resize(100, 0, image, resize.Lanczos3)
 	newUserImgResized, err := os.Create("resized-img.jpg")
 	if err != nil {
@@ -44,19 +44,17 @@ func resizeImg(image image.Image) {
 	newUserImgResized.Seek(0, 0)
 
 	jpeg.Encode(newUserImgResized, userImgResized, nil)
-	// return newUserImgResized
+	imgResized, err := os.Open("resized-img.jpg")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return imgResized
 
 }
 
 func main() {
-	img := openImgFile("./cat.jpg")
-	resizeImg(img)
-	imgToGrayAscii, err := os.Open("resized-img.jpg")
-	imgToGrayAscii.Seek(0, 0)
-
-	if err != nil {
-		log.Fatal(err)
-	}
+	userImg := openImgFile("./cat.jpg")
+	imgResized := resizeImg(userImg)
 
 	f, err := os.Create("ascii.txt")
 
@@ -66,21 +64,21 @@ func main() {
 
 	defer f.Close()
 
-	img2, _, _ := image.Decode(imgToGrayAscii)
-	grayImg := image.NewGray(img2.Bounds())
-	for y := img2.Bounds().Min.Y; y < img2.Bounds().Max.Y; y++ {
-		for x := img2.Bounds().Min.X; x < img2.Bounds().Max.X; x++ {
-			grayImg.Set(x, y, img2.At(x, y))
+	img, _, _ := image.Decode(imgResized)
+	grayImg := image.NewGray(img.Bounds())
+	for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
+		for x := img.Bounds().Min.X; x < img.Bounds().Max.X; x++ {
+			grayImg.Set(x, y, img.At(x, y))
 			r, g, b, _ := grayImg.At(x, y).RGBA()
 			avg := uint8((r + g + b) / 3)
-			_, err2 := f.WriteString(getChar(int(avg)))
-			if err2 != nil {
-				log.Fatal(err2)
+			_, err := f.WriteString(getChar(int(avg)))
+			if err != nil {
+				log.Fatal(err)
 			}
 		}
-		_, err2 := f.WriteString("\n")
-		if err2 != nil {
-			log.Fatal(err2)
+		_, err := f.WriteString("\n")
+		if err != nil {
+			log.Fatal(err)
 		}
 	}
 
