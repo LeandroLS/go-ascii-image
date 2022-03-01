@@ -13,8 +13,8 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-!test.jpg
 *.jpg
+!test.jpg
 *.png
 *.jpeg
 *.txt
