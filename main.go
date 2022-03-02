@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
@@ -42,6 +43,19 @@ func main() {
 
 	userImgResized := resize.Resize(uint(width), 0, userImg, resize.Lanczos3)
 
+	var content string
+	grayImg := image.NewGray(userImgResized.Bounds())
+	for y := userImgResized.Bounds().Min.Y; y < userImgResized.Bounds().Max.Y; y++ {
+		for x := userImgResized.Bounds().Min.X; x < userImgResized.Bounds().Max.X; x++ {
+			grayImg.Set(x, y, userImgResized.At(x, y))
+			r, g, b, _ := grayImg.At(x, y).RGBA()
+			avg := uint8((r + g + b) / 3)
+			char := getChar(int(avg))
+			content += char
+		}
+		content += ("\n")
+	}
+
 	f, err := os.Create("ascii.txt")
 
 	if err != nil {
@@ -50,21 +64,9 @@ func main() {
 
 	defer f.Close()
 
-	grayImg := image.NewGray(userImgResized.Bounds())
-	for y := userImgResized.Bounds().Min.Y; y < userImgResized.Bounds().Max.Y; y++ {
-		for x := userImgResized.Bounds().Min.X; x < userImgResized.Bounds().Max.X; x++ {
-			grayImg.Set(x, y, userImgResized.At(x, y))
-			r, g, b, _ := grayImg.At(x, y).RGBA()
-			avg := uint8((r + g + b) / 3)
-			_, err := f.WriteString(getChar(int(avg)))
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-		_, err := f.WriteString("\n")
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+	fmt.Println(content)
 
+	f.WriteString(content)
+
+	fmt.Printf("ASCII created in %s file", f.Name())
 }
