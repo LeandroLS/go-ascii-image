@@ -9,3 +9,6 @@ A simple CLI image converter to ASCII
 -p path of your picture
 -w the width of output
 ```
+
+## Example
+![](images/exampleGif.gif)
