@@ -39,6 +39,9 @@ func getChar(grayScale int) string {
 }
 
 func main() {
+
+	//go:embed test.jpg
+
 	userImg, width := Init()
 
 	userImgResized := resize.Resize(uint(width), 0, userImg, resize.Lanczos3)
