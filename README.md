@@ -11,4 +11,4 @@ A simple CLI image converter to ASCII
 ```
 
 ## Example
-![](images/exampleGif.gif)
+![](exampleGif.gif)
