@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	_ "embed"
 	"flag"
 	"fmt"
 	"image"
@@ -13,23 +15,45 @@ import (
 	"github.com/nfnt/resize"
 )
 
-func Init() (image.Image, int) {
+var (
+	//go:embed test.jpg
+	defaultImg []byte
+)
+
+func parseFlags() (string, int) {
 	width := flag.Int("w", 80, "Use -w <width>")
 	fpath := flag.String("p", "test.jpg", "Use -p <filesource>")
+
 	flag.Parse()
 
-	f, err := os.Open(*fpath)
+	return *fpath, *width
+}
+
+func openUserImg(filePath string) image.Image {
+
+	if filePath == "test.jpg" {
+		buf := bytes.NewBuffer(defaultImg)
+		img, _, err := image.Decode(buf)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return img
+	}
+
+	f, err := os.Open(filePath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	img, _, err := image.Decode(f)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	f.Close()
-	return img, *width
+	defer f.Close()
+
+	return img
 }
 
 func getChar(grayScale int) string {
@@ -39,11 +63,8 @@ func getChar(grayScale int) string {
 }
 
 func main() {
-
-	//go:embed test.jpg
-
-	userImg, width := Init()
-
+	filePath, width := parseFlags()
+	userImg := openUserImg(filePath)
 	userImgResized := resize.Resize(uint(width), 0, userImg, resize.Lanczos3)
 
 	var content string
