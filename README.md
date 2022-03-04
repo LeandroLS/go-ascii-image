@@ -10,5 +10,11 @@ A simple CLI image converter to ASCII
 -w the width of output
 ```
 
+## Installation
+
+```
+go get github.com/LeandroLS/go-ascii-image
+```
+
 ## Example
 ![](exampleGif.gif)
