@@ -13,7 +13,7 @@ A simple CLI image converter to ASCII
 ## Installation
 
 ```
-go get github.com/LeandroLS/go-ascii-image
+go install github.com/LeandroLS/go-ascii-image
 ```
 
 ## Example
